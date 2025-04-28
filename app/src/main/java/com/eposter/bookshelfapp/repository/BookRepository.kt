@@ -9,10 +9,13 @@ import kotlinx.coroutines.withContext
 class BookRepository {
 	private val bookApiService = BookApi.service
 	
-	suspend fun getBooks(query: String = "jazz+history"): List<Book> {
+	suspend fun getBooks(query: String): List<Book> {
 		return withContext(Dispatchers.IO) {
 			try {
 				val response = bookApiService.searchBooks(query)
+				if (response.items.isNullOrEmpty()) {
+					return@withContext emptyList<Book>()
+				}
 				response.items.map { it.toBook() }
 			} catch (e: Exception) {
 				// In a real app, you'd want better error handling

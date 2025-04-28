@@ -14,16 +14,29 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -68,6 +81,13 @@ fun BookshelfApp(viewModel: BookViewModel = viewModel()) {
             )
         }
         
+        // Add search bar
+        SearchBar(
+            onSearch = { query ->
+                viewModel.loadBooks(query)
+            }
+        )
+        
         if (viewModel.isLoading) {
             Box(
                 modifier = Modifier.fillMaxSize(),
@@ -90,6 +110,32 @@ fun BookshelfApp(viewModel: BookViewModel = viewModel()) {
             BookshelfGrid(books = viewModel.books)
         }
     }
+}
+
+@Composable
+fun SearchBar(onSearch: (String) -> Unit) {
+    var searchText by remember { mutableStateOf("") }
+    val focusManager = LocalFocusManager.current
+    
+    OutlinedTextField(
+        value = searchText,
+        onValueChange = { searchText = it },
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp),
+        placeholder = { Text("Search for books...") },
+        leadingIcon = { Icon(Icons.Default.Search, contentDescription = "Search") },
+        singleLine = true,
+        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+        keyboardActions = KeyboardActions(
+            onSearch = {
+                if (searchText.isNotBlank()) {
+                    onSearch(searchText)
+                    focusManager.clearFocus()
+                }
+            }
+        )
+    )
 }
 
 @Composable
@@ -148,11 +194,18 @@ fun BookTile(book: Book) {
 
 @Composable
 fun BookshelfGrid(books: List<Book>) {
+    // Use rememberLazyGridState to better manage the grid state
+    val gridState = rememberLazyGridState()
+    
     LazyVerticalGrid(
         columns = GridCells.Fixed(2),
+        state = gridState,
         modifier = Modifier.fillMaxSize()
     ) {
-        items(books.size) { index ->
+        items(
+            count = books.size,
+            key = { index -> books[index].id } // Using a stable key helps with recomposition
+        ) { index ->
             BookTile(book = books[index])
         }
     }
