@@ -271,7 +271,7 @@ fun BookshelfGrid(books: List<Book>) {
     val gridState = rememberLazyGridState()
     
     LazyVerticalGrid(
-        columns = GridCells.Fixed(2),
+        columns = GridCells.Adaptive(128.dp),
         state = gridState,
         modifier = Modifier.fillMaxSize()
     ) {
