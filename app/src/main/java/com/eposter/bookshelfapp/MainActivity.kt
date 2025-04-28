@@ -1,5 +1,6 @@
 package com.eposter.bookshelfapp
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -19,17 +20,22 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import coil.compose.AsyncImage
+import com.eposter.bookshelfapp.data.Book
 import com.eposter.bookshelfapp.ui.theme.BookshelfAppTheme
+import com.eposter.bookshelfapp.viewmodel.BookViewModel
 
 class MainActivity : ComponentActivity() {
+    @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -44,7 +50,7 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun BookshelfApp() {
+fun BookshelfApp(viewModel: BookViewModel = viewModel()) {
     Column() {
         Box(
             modifier = Modifier
@@ -61,19 +67,40 @@ fun BookshelfApp() {
                 color = MaterialTheme.colorScheme.onPrimary // Text color that contrasts with the background
             )
         }
-        BookshelfGrid()
+        
+        if (viewModel.isLoading) {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator()
+            }
+        } else if (viewModel.errorMessage != null) {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = viewModel.errorMessage ?: "Unknown error",
+                    color = MaterialTheme.colorScheme.error,
+                    modifier = Modifier.padding(16.dp)
+                )
+            }
+        } else {
+            BookshelfGrid(books = viewModel.books)
+        }
     }
 }
 
 @Composable
-fun BookTile(title: String = "Book Title", author: String = "Author Name") {
+fun BookTile(book: Book) {
     Card(
         modifier = Modifier
             .padding(8.dp)
             .aspectRatio(0.7f)
     ) {
         Column {
-            // Book cover placeholder
+            // Book cover
             Box(
                 modifier = Modifier
                     .weight(1f)
@@ -81,10 +108,19 @@ fun BookTile(title: String = "Book Title", author: String = "Author Name") {
                     .background(Color(0xFF90CAF9)),
                 contentAlignment = Alignment.Center
             ) {
-                Text(
-                    text = "📚",
-                    style = MaterialTheme.typography.displayMedium
-                )
+                if (book.thumbnailUrl != null) {
+                    AsyncImage(
+                        model = book.thumbnailUrl,
+                        contentDescription = "Cover of ${book.title}",
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier.fillMaxSize()
+                    )
+                } else {
+                    Text(
+                        text = "📚",
+                        style = MaterialTheme.typography.displayMedium
+                    )
+                }
             }
             
             // Book details
@@ -93,13 +129,13 @@ fun BookTile(title: String = "Book Title", author: String = "Author Name") {
                     .padding(8.dp)
             ) {
                 Text(
-                    text = title,
+                    text = book.title,
                     style = MaterialTheme.typography.titleMedium,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
                 Text(
-                    text = author,
+                    text = book.author,
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     maxLines = 1,
@@ -111,20 +147,18 @@ fun BookTile(title: String = "Book Title", author: String = "Author Name") {
 }
 
 @Composable
-fun BookshelfGrid() {
+fun BookshelfGrid(books: List<Book>) {
     LazyVerticalGrid(
         columns = GridCells.Fixed(2),
         modifier = Modifier.fillMaxSize()
     ) {
-        items(10) { index ->
-            BookTile(
-                title = "Book ${index + 1}",
-                author = "Author ${index + 1}"
-            )
+        items(books.size) { index ->
+            BookTile(book = books[index])
         }
     }
 }
 
+// Keep the preview functions but update them to use the new models
 @Preview(showBackground = true)
 @Composable
 fun BookshelfAppPreview() {
@@ -137,6 +171,14 @@ fun BookshelfAppPreview() {
 @Composable
 fun BookTilePreview() {
     BookshelfAppTheme {
-        BookTile()
+        BookTile(
+            Book(
+                id = "1",
+                title = "Sample Book",
+                author = "Sample Author",
+                thumbnailUrl = null,
+                description = "Sample description"
+            )
+        )
     }
 }
