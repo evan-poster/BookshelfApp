@@ -55,7 +55,7 @@ class BookViewModel(application: Application) : AndroidViewModel(application) {
                 }
             } catch (e: Exception) {
                 Log.e(TAG, "Error loading books: ${e.message}", e)
-                errorMessage = "Failed to load books: ${e.message}"
+                errorMessage = "Failed to load books due to an error: ${e.message}. Please check your network connection or try again later."
                 books = emptyList()
                 
                 // Try to load from cache as a fallback
@@ -66,7 +66,7 @@ class BookViewModel(application: Application) : AndroidViewModel(application) {
                         Log.d(TAG, "Found ${cachedBooks.size} books in cache")
                         books = cachedBooks
                         isOfflineMode = true
-                        errorMessage = "Showing cached results. ${e.message}"
+                        errorMessage = "Showing cached results because of an error: ${e.message}. Results may be outdated."
                     } else {
                         Log.d(TAG, "No books found in cache")
                     }
