@@ -5,11 +5,10 @@ import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.util.Log
 import com.eposter.bookshelfapp.data.Book
-import com.eposter.bookshelfapp.data.BookItem
-import com.eposter.bookshelfapp.data.toBook
-import com.eposter.bookshelfapp.data.toEntity
 import com.eposter.bookshelfapp.data.local.BookDatabase
 import com.eposter.bookshelfapp.data.local.toBook
+import com.eposter.bookshelfapp.data.toBook
+import com.eposter.bookshelfapp.data.toEntity
 import com.eposter.bookshelfapp.network.BookApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext

@@ -188,21 +188,6 @@ fun SearchBar(onSearch: (String) -> Unit) {
                     )
                 }
             }
-            // } else {
-            //     androidx.compose.material3.IconButton(
-            //         onClick = {
-            //             if (searchText.isNotBlank()) {
-            //                 onSearch(searchText)
-            //                 focusManager.clearFocus()
-            //             }
-            //         }
-            //     ) {
-            //         Icon(
-            //             imageVector = Icons.Default.Search,
-            //             contentDescription = "Search"
-            //         )
-            //     }
-            // }
         },
         singleLine = true,
         keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
