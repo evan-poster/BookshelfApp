@@ -46,12 +46,16 @@ class BookRepository(private val context: Context) {
                         Log.d(TAG, "Converted ${books.size} books from API response")
                         
                         // Cache the results
-                        if (books.isNotEmpty()) {
-                            val bookEntities = books.map { it.toEntity(query) }
-                            bookDao.deleteBooksByQuery(query) // Clear old results for this query
-                            bookDao.insertBooks(bookEntities)
-                            Log.d(TAG, "Cached ${bookEntities.size} books in database")
-                        }
+if (books.isNotEmpty()) {
+    val existingBooks = bookDao.getBooksByQuery(query)  // Check if books exist
+    if (existingBooks.isNotEmpty()) {
+        // Optionally update instead of delete and insert, but for simplicity, delete only if exists
+        bookDao.deleteBooksByQuery(query)
+    }
+    val bookEntities = books.map { it.toEntity(query) }
+    bookDao.insertBooks(bookEntities)
+    Log.d(TAG, "Cached ${bookEntities.size} books in database")
+}
                         
                         books
                     } catch (e: IOException) {
